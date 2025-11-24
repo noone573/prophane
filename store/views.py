@@ -26,9 +26,10 @@ def signup_view(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, f"Welcome to Propane Point, {user.username}! 🎉")
             return redirect("dashboard")
+        
     else:
         form = UserCreationForm()
     return render(request, "signup.html", {"form": form})
@@ -41,7 +42,7 @@ def login_view(request):
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, f"Welcome back, {user.username}! 👋")
             return redirect("dashboard")
     else:
