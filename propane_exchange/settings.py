@@ -27,7 +27,12 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-vw@_z=5vg_45jjqb$b(sy
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['prophane.onrender.com', 'localhost', '127.0.0.1']
+
+# CSRF Settings for production
+CSRF_TRUSTED_ORIGINS = [
+    'https://prophane.onrender.com',
+]
 
 # Application definition
 
@@ -226,3 +231,11 @@ LOGGING = {
         },
     },
 }
+
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
