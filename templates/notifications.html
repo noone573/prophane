@@ -1,0 +1,343 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Notifications - Propane Point</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --primary-orange: #FF8C42;
+      --primary-cyan: #00B4D8;
+      --dark-blue: #023E8A;
+      --light-bg: #F8F9FA;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    
+    /* Navbar */
+    .navbar {
+      width: 100%;
+      height: 85px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 4px solid var(--primary-orange);
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      text-decoration: none;
+    }
+    
+    .logo-icon {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+      margin-left: -15px;
+    }
+    
+    .logo-text-top {
+      font-size: 22px;
+      color: var(--primary-cyan);
+      font-weight: 600;
+      font-style: italic;
+      margin-bottom: 2px;
+    }
+    
+    .logo-text-bottom {
+      font-size: 32px;
+      color: var(--dark-blue);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+    
+    .nav-btn {
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      text-decoration: none;
+      position: relative;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark-blue);
+      border: 2px solid transparent;
+    }
+    
+    .nav-btn:hover {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255,140,66,0.4);
+    }
+    
+    .nav-btn.logout {
+      background: #DC3545;
+      color: white;
+      border: 2px solid #DC3545;
+    }
+    
+    .nav-btn.logout:hover {
+      background: #C82333;
+      border-color: #C82333;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: 3px;
+      right: 8px;
+      background: #DC3545;
+      color: white;
+      border-radius: 50%;
+      min-width: 20px;
+      height: 20px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 2px solid white;
+      padding: 0 5px;
+    }
+    
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      padding: 40px;
+      color: white;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 20px rgba(255,140,66,0.3);
+    }
+    
+    .page-header h1 {
+      margin: 0;
+      font-weight: 900;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .page-header p {
+      margin: 10px 0 0 0;
+      opacity: 0.95;
+      font-size: 18px;
+    }
+    
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 30px 50px;
+    }
+    
+    /* Notification Cards */
+    .notification-card {
+      background: white;
+      border: 3px solid #dee2e6;
+      border-radius: 18px;
+      padding: 25px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .notification-card:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      transform: translateX(8px);
+      border-color: var(--primary-cyan);
+    }
+    
+    .notification-card.unread {
+      background: linear-gradient(135deg, #FFF5F0 0%, #FFE8DD 100%);
+      border: 4px solid var(--primary-orange);
+      border-left-width: 8px;
+    }
+    
+    .notification-icon {
+      font-size: 48px;
+      flex-shrink: 0;
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, #0096C7 100%);
+      border-radius: 50%;
+      box-shadow: 0 4px 15px rgba(0,180,216,0.3);
+    }
+    
+    .notification-content {
+      flex: 1;
+    }
+    
+    .notification-message {
+      font-size: 17px;
+      color: var(--dark-blue);
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    
+    .notification-time {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      background: white;
+      border: 4px solid var(--primary-cyan);
+      border-radius: 20px;
+      padding: 60px;
+      text-align: center;
+      box-shadow: 0 6px 25px rgba(0,180,216,0.2);
+    }
+    
+    .empty-state-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    .empty-state h4 {
+      color: var(--dark-blue);
+      font-weight: 800;
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+    
+    .empty-state p {
+      color: #666;
+      font-size: 18px;
+    }
+    
+    .btn-back {
+      background: #6C757D;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      margin-bottom: 30px;
+    }
+    
+    .btn-back:hover {
+      background: #5A6268;
+      transform: translateY(-2px);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <a href="{% url 'map' %}" class="logo-container">
+      <div class="logo-icon">
+        <img src="{% static 'img/logo.png' %}" alt="Propane Point Logo" class="logo-img">
+      </div>
+      <div class="logo-text">
+        <div class="logo-text-top">Propane</div>
+        <div class="logo-text-bottom">POINT</div>
+      </div>
+    </a>
+    <div class="nav-buttons">
+      {% if request.user.profile.role == 'seller' %}
+        <a href="{% url 'my_stores' %}" class="nav-btn">My Stores</a>
+      {% endif %}
+      <a href="{% url 'my_orders' %}" class="nav-btn">My Orders</a>
+      <a href="{% url 'notifications' %}" class="nav-btn">
+        Notifications
+        {% if unread_count > 0 %}
+        <span class="notification-badge">{{ unread_count }}</span>
+        {% endif %}
+      </a>
+      <a href="{% url 'logout' %}" class="nav-btn logout">Logout</a>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <h1>🔔 Notifications</h1>
+      <p>Stay updated with your activities</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <a href="{% url 'map' %}" class="btn-back">← Back to Map</a>
+
+    {% if notifications %}
+      {% for notification in notifications %}
+        <div class="notification-card {% if not notification.is_read %}unread{% endif %}">
+          <div class="notification-icon">
+            🛒
+          </div>
+          <div class="notification-content">
+            <p class="notification-message">{{ notification.message }}</p>
+            <small class="notification-time">{{ notification.created_at|date:"M d, Y g:i A" }}</small>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">🔔</div>
+        <h4>No notifications yet</h4>
+        <p>You'll receive notifications about your orders and activities.</p>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

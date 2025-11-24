@@ -1,0 +1,387 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Stores - Propane Point</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --primary-orange: #FF8C42;
+      --primary-cyan: #00B4D8;
+      --dark-blue: #023E8A;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }    
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    /* Navbar */
+    .navbar {
+      width: 100%;
+      height: 85px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 4px solid var(--primary-orange);
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      text-decoration: none;
+    }
+    
+    .logo-icon {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+      margin-left: -15px;
+    }
+    
+    .logo-text-top {
+      font-size: 22px;
+      color: var(--primary-cyan);
+      font-weight: 600;
+      font-style: italic;
+      margin-bottom: 2px;
+    }
+    
+    .logo-text-bottom {
+      font-size: 32px;
+      color: var(--dark-blue);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .btn-back {
+      background: #6C757D;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      margin-bottom: 30px;
+    }
+    
+    .btn-back:hover {
+      background: #5A6268;
+      transform: translateY(-2px);
+      color: white;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+    
+    .nav-btn {
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      text-decoration: none;
+      position: relative;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark-blue);
+      border: 2px solid transparent;
+    }
+    
+    .nav-btn:hover {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255,140,66,0.4);
+    }
+    
+    .nav-btn.logout {
+      background: #DC3545;
+      color: white;
+      border: 2px solid #DC3545;
+    }
+    
+    .nav-btn.logout:hover {
+      background: #C82333;
+      border-color: #C82333;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: 3px;
+      right: 8px;
+      background: #DC3545;
+      color: white;
+      border-radius: 50%;
+      min-width: 20px;
+      height: 20px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 2px solid white;
+      padding: 0 5px;
+    }
+    
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      padding: 40px;
+      color: white;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 20px rgba(255,140,66,0.3);
+    }
+    
+    .page-header h1 {
+      margin: 0;
+      font-weight: 900;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .page-header p {
+      margin: 10px 0 0 0;
+      opacity: 0.95;
+      font-size: 18px;
+    }
+    
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 30px 50px;
+    }
+    
+    .store-card {
+      border: 3px solid #dee2e6;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 25px;
+      transition: all 0.3s;
+      background: white;
+    }
+    
+    .store-card:hover {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transform: translateY(-5px);
+      border-color: var(--primary-cyan);
+    }
+    
+    .tank-badge {
+      display: inline-block;
+      padding: 8px 15px;
+      margin: 5px;
+      border-radius: 10px;
+      font-size: 13px;
+      background: #E0F7FA;
+      color: var(--dark-blue);
+      font-weight: 600;
+    }
+    
+    .tank-badge.inactive {
+      background: #F8D7DA;
+      color: #721C24;
+      text-decoration: line-through;
+    }
+    
+    .btn-manage {
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, #0096C7 100%);
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+    
+    .btn-manage:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,180,216,0.3);
+      color: white;
+    }
+    
+    .btn-delete {
+      background: #DC3545;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      margin-left: 10px;
+    }
+    
+    .btn-delete:hover {
+      background: #C82333;
+      transform: translateY(-2px);
+      color: white;
+    }
+    
+    .btn-create {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 12px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255,140,66,0.3);
+    }
+    
+    .btn-create:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255,140,66,0.4);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="{% url 'map' %}" class="logo-container">
+      <div class="logo-icon">
+        <img src="{% static 'img/logo.png' %}" alt="Propane Point Logo" class="logo-img">
+      </div>
+      <div class="logo-text">
+        <div class="logo-text-top">Propane</div>
+        <div class="logo-text-bottom">POINT</div>
+      </div>
+    </a>
+    <div class="nav-buttons">
+      <a href="{% url 'my_stores' %}" class="nav-btn">My Stores</a>
+      <a href="{% url 'my_orders' %}" class="nav-btn">My Orders</a>
+      <a href="{% url 'notifications' %}" class="nav-btn">
+        Notifications
+        {% if unread_count > 0 %}
+        <span class="notification-badge">{{ unread_count }}</span>
+        {% endif %}
+      </a>
+      <a href="{% url 'logout' %}" class="nav-btn logout">Logout</a>
+    </div>
+  </div>
+  <div class="page-header">
+    <div class="container">
+      <h1>🏪 My Stores</h1>
+      <p>Manage your propane stores</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <a href="{% url 'map' %}" class="btn-back">← Back to Map</a>
+      <a href="{% url 'create_store' %}" class="btn-create">+ Create New Store</a>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% if stores %}
+      {% for store in stores %}
+        <div class="store-card">
+          <div class="row">
+            <div class="col-md-8">
+              <h4 style="color: var(--dark-blue); font-weight: 800;">{{ store.name }}</h4>
+              <p class="text-muted">{{ store.description }}</p>
+              <p class="mb-1"><strong>📍 Location:</strong> {{ store.latitude }}, {{ store.longitude }}</p>
+              <p class="mb-2"><strong>📅 Created:</strong> {{ store.created_at|date:"M d, Y" }}</p>
+              
+              <div class="mt-3">
+                <strong>Available Tanks:</strong><br>
+                {% for tank in store.tanks.all %}
+                  <span class="tank-badge {% if not tank.is_active %}inactive{% endif %}">
+                    {{ tank.tank_type }} - ₱{{ tank.price }} 
+                    (Stock: {{ tank.stock }})
+                    {% if not tank.is_active %}❌{% endif %}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="col-md-4 text-end">
+              <a href="{% url 'manage_store' store.id %}" class="btn-manage">⚙️ Manage Store</a>
+              <a href="{% url 'delete_store' store.id %}" class="btn-delete">🗑️ Delete</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert alert-info" style="text-align: center; padding: 50px; background: white; border: 3px solid var(--primary-cyan); border-radius: 20px;">
+        <h3 style="color: var(--dark-blue); font-weight: 800;">No Stores Yet</h3>
+        <p style="font-size: 16px; color: #666; margin: 20px 0;">Start selling propane by creating your first store!</p>
+        <a href="{% url 'create_store' %}" class="btn-create" style="margin-top: 20px;">+ Create Your First Store</a>
+      </div>
+    {% endif %}
+  </div>
+</body>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, ... } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTQQ-7JFM7iy0_8Cdeh_zq-IQpjCvrVYE",
+    authDomain: "propane-point.firebaseapp.com",
+    projectId: "propane-point",
+    storageBucket: "propane-point.firebasestorage.app",
+    messagingSenderId: "291811492263",
+    appId: "1:291811492263:web:dfe4b5e4bd6fdaaa617682",
+    measurementId: "G-CNQPM8V6W7"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+</html>

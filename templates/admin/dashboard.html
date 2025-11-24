@@ -1,0 +1,546 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard - Propane Point</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --primary-orange: #FF8C42;
+      --primary-cyan: #00B4D8;
+      --dark-blue: #023E8A;
+      --light-bg: #F8F9FA;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    
+    /* Navbar */
+    .navbar {
+      width: 100%;
+      height: 85px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 4px solid #DC3545;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .admin-badge {
+      background: linear-gradient(135deg, #DC3545 0%, #C82333 100%);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(220,53,69,0.3);
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    
+    .nav-btn {
+      text-decoration: none;
+      color: var(--dark-blue);
+      font-weight: 700;
+      font-size: 15px;
+      transition: all 0.3s;
+      padding: 5px 0;
+    }
+    
+    .nav-btn:hover {
+      color: var(--primary-orange);
+    }
+    
+    .nav-btn.logout {
+      color: #DC3545;
+    }
+    
+    .nav-btn.logout:hover {
+      color: #C82333;
+    }
+    
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, #DC3545 0%, #C82333 100%);
+      padding: 40px;
+      color: white;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 20px rgba(220,53,69,0.3);
+    }
+    
+    .page-header h1 {
+      margin: 0;
+      font-weight: 900;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 30px 50px;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+      border: 3px solid transparent;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card.pending {
+      border-color: var(--primary-orange);
+      background: linear-gradient(135deg, #FFF5F0 0%, white 100%);
+    }
+    
+    .stat-card.sellers {
+      border-color: var(--primary-cyan);
+      background: linear-gradient(135deg, #E0F7FA 0%, white 100%);
+    }
+    
+    .stat-card.stores {
+      border-color: #28A745;
+      background: linear-gradient(135deg, #D4EDDA 0%, white 100%);
+    }
+    
+    .stat-card.customers {
+      border-color: #6C757D;
+      background: linear-gradient(135deg, #E2E3E5 0%, white 100%);
+    }
+
+    .stat-card.orders {
+      border-color: #FFC107;
+      background: linear-gradient(135deg, #FFF8E1 0%, white 100%);
+    }
+    
+    .stat-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    
+    .stat-value {
+      font-size: 42px;
+      font-weight: 900;
+      color: var(--dark-blue);
+      margin-bottom: 10px;
+    }
+    
+    .stat-label {
+      font-size: 16px;
+      color: #666;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .action-card {
+      background: white;
+      border: 4px solid #dee2e6;
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+    }
+
+    .action-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .action-card.applications {
+      border-color: var(--primary-orange);
+      background: linear-gradient(135deg, #FFF5F0 0%, white 100%);
+    }
+
+    .action-card.sellers {
+      border-color: var(--primary-cyan);
+      background: linear-gradient(135deg, #E0F7FA 0%, white 100%);
+    }
+
+    .action-card.stores {
+      border-color: #28A745;
+      background: linear-gradient(135deg, #D4EDDA 0%, white 100%);
+    }
+
+    .action-card.orders {
+      border-color: #FFC107;
+      background: linear-gradient(135deg, #FFF8E1 0%, white 100%);
+    }
+
+    .action-icon {
+      font-size: 64px;
+      margin-bottom: 15px;
+    }
+
+    .action-title {
+      color: var(--dark-blue);
+      font-weight: 900;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .action-desc {
+      color: #666;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .action-badge {
+      background: #DC3545;
+      color: white;
+      padding: 6px 15px;
+      border-radius: 15px;
+      font-weight: 800;
+      font-size: 13px;
+      margin-top: 10px;
+      display: inline-block;
+    }
+    
+    /* Applications Section */
+    .section-title {
+      color: var(--dark-blue);
+      font-weight: 900;
+      font-size: 28px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .applications-grid {
+      display: grid;
+      gap: 25px;
+    }
+    
+    .application-card {
+      background: white;
+      border: 4px solid #dee2e6;
+      border-radius: 20px;
+      padding: 30px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .application-card:hover {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      transform: translateX(5px);
+      border-color: var(--primary-cyan);
+    }
+    
+    /* Status-specific hover outlines for applications */
+    .application-card.pending:hover {
+      border-color: var(--primary-orange);
+      box-shadow: 0 10px 35px rgba(255,140,66,0.18);
+      transform: translateX(8px) translateY(-2px);
+    }
+    
+    .application-card.pending {
+      border-left: 8px solid var(--primary-orange);
+    }
+    
+    .application-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 20px;
+    }
+    
+    .business-name {
+      color: var(--dark-blue);
+      font-weight: 800;
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+    
+    .applicant-name {
+      color: #666;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .status-badge {
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-pending {
+      background: linear-gradient(135deg, #FFF3CD 0%, #FFE69C 100%);
+      color: #856404;
+      border: 2px solid var(--primary-orange);
+    }
+    
+    .application-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .detail-item {
+      padding: 15px;
+      background: #F8F9FA;
+      border-radius: 10px;
+    }
+    
+    .detail-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .detail-value {
+      font-size: 15px;
+      color: var(--dark-blue);
+      font-weight: 600;
+    }
+    
+    .btn-review {
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, #0096C7 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 10px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,180,216,0.3);
+      font-size: 15px;
+      text-transform: uppercase;
+    }
+    
+    .btn-review:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,180,216,0.5);
+      color: white;
+    }
+    
+    .empty-state {
+      background: white;
+      border: 4px dashed #dee2e6;
+      border-radius: 20px;
+      padding: 60px;
+      text-align: center;
+    }
+    
+    .empty-state-icon {
+      font-size: 80px;
+      opacity: 0.3;
+      margin-bottom: 20px;
+    }
+    
+    .empty-state h4 {
+      color: #666;
+      font-weight: 700;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="logo-container">
+      <h2 style="color: var(--dark-blue); margin: 0; font-weight: 900;">Propane Point</h2>
+      <span class="admin-badge">👑 ADMIN</span>
+    </div>
+    <div class="nav-buttons">
+      <a href="{% url 'admin_applications' %}" class="nav-btn">Applications</a>
+      <a href="{% url 'admin_sellers' %}" class="nav-btn">Sellers</a>
+      <a href="{% url 'admin_stores' %}" class="nav-btn">Stores</a>
+      <a href="{% url 'admin_orders' %}" class="nav-btn">Orders</a>
+      <a href="{% url 'map' %}" class="nav-btn">Map</a>
+      <a href="{% url 'logout' %}" class="nav-btn logout">Logout</a>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <h1>👑 Admin Dashboard</h1>
+      <p style="margin: 10px 0 0 0; opacity: 0.95; font-size: 18px;">
+        System Overview & Management
+      </p>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card pending">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-value">{{ pending_applications }}</div>
+        <div class="stat-label">Pending Applications</div>
+      </div>
+      
+      <div class="stat-card sellers">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">{{ total_sellers }}</div>
+        <div class="stat-label">Approved Sellers</div>
+      </div>
+      
+      <div class="stat-card stores">
+        <div class="stat-icon">🏪</div>
+        <div class="stat-value">{{ total_stores }}</div>
+        <div class="stat-label">Active Stores</div>
+      </div>
+      
+      <div class="stat-card customers">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-value">{{ total_customers }}</div>
+        <div class="stat-label">Total Customers</div>
+      </div>
+
+      <div class="stat-card orders">
+        <div class="stat-icon">📦</div>
+        <div class="stat-value">{{ pending_review_count }}</div>
+        <div class="stat-label">Orders Need Review</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <h3 class="section-title">⚡ Quick Actions</h3>
+    <div class="quick-actions">
+      <a href="{% url 'admin_applications' %}" class="action-card applications">
+        <div class="action-icon">📋</div>
+        <div class="action-title">Applications</div>
+        <div class="action-desc">Review seller applications</div>
+        {% if pending_applications > 0 %}
+          <span class="action-badge">{{ pending_applications }} pending</span>
+        {% endif %}
+      </a>
+
+      <a href="{% url 'admin_sellers' %}" class="action-card sellers">
+        <div class="action-icon">👥</div>
+        <div class="action-title">Manage Sellers</div>
+        <div class="action-desc">View and manage sellers</div>
+      </a>
+
+      <a href="{% url 'admin_stores' %}" class="action-card stores">
+        <div class="action-icon">🏪</div>
+        <div class="action-title">All Stores</div>
+        <div class="action-desc">Monitor all stores</div>
+      </a>
+
+      <a href="{% url 'admin_orders' %}" class="action-card orders">
+        <div class="action-icon">📦</div>
+        <div class="action-title">Manage Orders</div>
+        <div class="action-desc">Review pickup proofs</div>
+        {% if pending_review_count > 0 %}
+          <span class="action-badge">{{ pending_review_count }} need review</span>
+        {% endif %}
+      </a>
+    </div>
+
+    <!-- Recent Applications -->
+    <h3 class="section-title">
+      📋 Recent Seller Applications
+    </h3>
+    
+    {% if recent_applications %}
+      <div class="applications-grid">
+        {% for app in recent_applications %}
+          <div class="application-card {{ app.status }}">
+            <div class="application-header">
+              <div>
+                <div class="business-name">{{ app.business_name }}</div>
+                <div class="applicant-name">by {{ app.user.username }}</div>
+              </div>
+              <span class="status-badge status-{{ app.status }}">
+                {{ app.get_status_display }}
+              </span>
+            </div>
+            
+            <div class="application-details">
+              <div class="detail-item">
+                <div class="detail-label">📅 Applied</div>
+                <div class="detail-value">{{ app.created_at|date:"M d, Y" }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">📞 Phone</div>
+                <div class="detail-value">{{ app.phone }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">📧 Email</div>
+                <div class="detail-value">{{ app.email }}</div>
+              </div>
+            </div>
+            
+            {% if app.status == 'pending' %}
+              <a href="{% url 'admin_review_application' app.id %}" class="btn-review">
+                🔍 Review Application
+              </a>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <h4>No applications yet</h4>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

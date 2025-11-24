@@ -1,0 +1,417 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ store.name }} - Propane Point</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --primary-orange: #FF8C42;
+      --primary-cyan: #00B4D8;
+      --dark-blue: #023E8A;
+      --light-bg: #F8F9FA;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    
+    /* Navbar */
+    .navbar {
+      width: 100%;
+      height: 85px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 4px solid var(--primary-orange);
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      text-decoration: none;
+    }
+    
+    .logo-icon {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+      margin-left: -15px;
+    }
+    
+    .logo-text-top {
+      font-size: 22px;
+      color: var(--primary-cyan);
+      font-weight: 600;
+      font-style: italic;
+      margin-bottom: 2px;
+    }
+    
+    .logo-text-bottom {
+      font-size: 32px;
+      color: var(--dark-blue);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+    
+    .nav-btn {
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      text-decoration: none;
+      position: relative;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark-blue);
+      border: 2px solid transparent;
+    }
+    
+    .nav-btn:hover {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255,140,66,0.4);
+    }
+    
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      padding: 40px;
+      color: white;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 20px rgba(255,140,66,0.3);
+    }
+    
+    .page-header h1 {
+      margin: 0;
+      font-weight: 900;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 30px 50px;
+    }
+    
+    /* Tank List */
+    .tank-item {
+      background: white;
+      border: 4px solid #dee2e6;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .tank-item:hover {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      transform: translateY(-3px);
+      border-color: var(--primary-cyan);
+    }
+    
+    .tank-info {
+      flex: 1;
+    }
+    
+    .tank-name {
+      color: var(--dark-blue);
+      font-weight: 800;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    
+    .tank-price {
+      color: var(--primary-orange);
+      font-weight: 900;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    
+    .stock-badge {
+      background: linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%);
+      color: var(--primary-cyan);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 14px;
+      border: 2px solid var(--primary-cyan);
+      display: inline-block;
+    }
+    
+    .btn-buy {
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, #0096C7 100%);
+      color: white;
+      border: none;
+      padding: 14px 35px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(0,180,216,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn-buy:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 30px rgba(0,180,216,0.6);
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 62, 138, 0.8);
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    
+    .modal.show {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 25px;
+      padding: 40px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+      border: 4px solid var(--primary-cyan);
+    }
+    
+    .modal-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .modal-title {
+      color: var(--dark-blue);
+      font-weight: 900;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 700;
+      color: var(--dark-blue);
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 14px;
+      border: 3px solid #dee2e6;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-cyan);
+      box-shadow: 0 0 0 4px rgba(0,180,216,0.15);
+    }
+    
+    .btn-submit {
+      background: linear-gradient(135deg, #28A745 0%, #20C997 100%);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 17px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(40,167,69,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      width: 100%;
+    }
+    
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 30px rgba(40,167,69,0.6);
+    }
+    
+    .btn-back {
+      background: #6C757D;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      margin-bottom: 30px;
+    }
+    
+    .btn-back:hover {
+      background: #5A6268;
+      transform: translateY(-2px);
+      color: white;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <a href="{% url 'map' %}" class="logo-container">
+      <div class="logo-icon">
+        <img src="{% static 'img/logo.png' %}" alt="Propane Point Logo" class="logo-img">
+      </div>
+      <div class="logo-text">
+        <div class="logo-text-top">Propane</div>
+        <div class="logo-text-bottom">POINT</div>
+      </div>
+    </a>
+    <div class="nav-buttons">
+      <a href="{% url 'my_stores' %}" class="nav-btn">My Stores</a>
+      <a href="{% url 'my_orders' %}" class="nav-btn">My Orders</a>
+      <a href="{% url 'notifications' %}" class="nav-btn">Notifications</a>
+      <a href="{% url 'logout' %}" class="nav-btn logout">Logout</a>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <h1>🏪 {{ store.name }}</h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <a href="{% url 'map' %}" class="btn-back">← Back to Map</a>
+
+    {% if tanks %}
+      {% for tank in tanks %}
+        <div class="tank-item">
+          <div class="tank-info">
+            <div class="tank-name">{{ tank.tank_type }}</div>
+            <div class="tank-price">₱{{ tank.price }}</div>
+            <span class="stock-badge">{{ tank.stock }} units in stock</span>
+          </div>
+          <button class="btn-buy" data-bs-toggle="modal" data-bs-target="#reserveModal{{ tank.id }}">
+            Buy Now
+          </button>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="reserveModal{{ tank.id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3 class="modal-title">🛒 Reserve {{ tank.tank_type }}</h3>
+              </div>
+              <form method="post" action="{% url 'reserve_tank' tank.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label class="form-label">Your Full Name</label>
+                  <input type="text" name="name" class="form-control" placeholder="Enter your full name" required>
+                </div>
+                <button type="submit" class="btn-submit">Confirm Reservation</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert alert-info" style="text-align: center; padding: 40px; background: white; border: 4px solid var(--primary-cyan); border-radius: 20px;">
+        <h4 style="color: var(--dark-blue); font-weight: 800;">No tanks available</h4>
+        <p style="color: #666;">This store currently has no tanks for sale.</p>
+      </div>
+    {% endif %}
+  </div>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, ... } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTQQ-7JFM7iy0_8Cdeh_zq-IQpjCvrVYE",
+    authDomain: "propane-point.firebaseapp.com",
+    projectId: "propane-point",
+    storageBucket: "propane-point.firebasestorage.app",
+    messagingSenderId: "291811492263",
+    appId: "1:291811492263:web:dfe4b5e4bd6fdaaa617682",
+    measurementId: "G-CNQPM8V6W7"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+</html>

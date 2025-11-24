@@ -1,0 +1,191 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>All Stores - Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --primary-orange: #FF8C42;
+      --primary-cyan: #00B4D8;
+      --dark-blue: #023E8A;
+    }
+    
+    body {
+      background: #F8F9FA;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      width: 100%;
+      height: 85px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 4px solid #DC3545;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #DC3545 0%, #C82333 100%);
+      padding: 40px;
+      color: white;
+      margin-bottom: 40px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 30px 50px;
+    }
+    
+    .store-card {
+      background: white;
+      border: 4px solid #dee2e6;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 25px;
+      transition: all 0.3s;
+      border-left: 8px solid #28A745;
+    }
+    
+    .store-card:hover {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      transform: translateX(5px);
+    }
+    
+    .store-card.inactive {
+      border-left-color: #DC3545;
+      opacity: 0.7;
+    }
+    
+    .btn-toggle {
+      padding: 10px 25px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      border: none;
+      color: white;
+    }
+    
+    .btn-deactivate {
+      background: #DC3545;
+    }
+    
+    .btn-deactivate:hover {
+      background: #C82333;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .btn-activate {
+      background: #28A745;
+    }
+    
+    .btn-activate:hover {
+      background: #218838;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .status-badge {
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 13px;
+      display: inline-block;
+    }
+    
+    .status-active {
+      background: #D4EDDA;
+      color: #155724;
+    }
+    
+    .status-inactive {
+      background: #F8D7DA;
+      color: #721C24;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h2 style="color: var(--dark-blue); margin: 0; font-weight: 900;">Propane Point Admin</h2>
+    <div style="display: flex; gap: 20px;">
+      <a href="{% url 'admin_dashboard' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Dashboard</a>
+      <a href="{% url 'admin_applications' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Applications</a>
+      <a href="{% url 'admin_sellers' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Sellers</a>
+      <a href="{% url 'admin_orders' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Orders</a>
+      <a href="{% url 'map' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Map</a>
+      <a href="{% url 'logout' %}" style="text-decoration: none; color: #DC3545; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#C82333'" onmouseout="this.style.color='#DC3545'">Logout</a>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="container">
+      <h1 style="margin: 0; font-weight: 900;">All Stores</h1>
+      <p style="margin: 10px 0 0 0;">Monitor and manage all stores in the system</p>
+    </div>
+  </div>
+
+  <div class="container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="border-radius: 12px;">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% if stores %}
+      {% for store in stores %}
+        <div class="store-card {% if not store.is_active %}inactive{% endif %}">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h4 style="color: var(--dark-blue); font-weight: 800; margin-bottom: 10px;">
+                {{ store.name }}
+              </h4>
+              <p style="margin: 5px 0; color: #666;"><strong>Owner:</strong> {{ store.owner.username }}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Location:</strong> {{ store.latitude }}, {{ store.longitude }}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Description:</strong> {{ store.description }}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Created:</strong> {{ store.created_at|date:"M d, Y" }}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Tanks:</strong> {{ store.tanks.count }}</p>
+              <p style="margin: 10px 0 0 0;">
+                <strong>Status:</strong>
+                <span class="status-badge {% if store.is_active %}status-active{% else %}status-inactive{% endif %}">
+                  {% if store.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+              </p>
+            </div>
+            <div class="col-md-4 text-end">
+              {% if store.is_active %}
+                <a href="{% url 'admin_toggle_store' store.id %}" 
+                   class="btn-toggle btn-deactivate"
+                   onclick="return confirm('Deactivate this store? It will not appear on the map.')">
+                  Deactivate Store
+                </a>
+              {% else %}
+                <a href="{% url 'admin_toggle_store' store.id %}" 
+                   class="btn-toggle btn-activate"
+                   onclick="return confirm('Activate this store?')">
+                  Activate Store
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div style="background: white; border: 4px dashed #dee2e6; border-radius: 20px; padding: 60px; text-align: center;">
+        <div style="font-size: 80px; opacity: 0.3; margin-bottom: 20px;">🏪</div>
+        <h4 style="color: #666;">No stores yet</h4>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

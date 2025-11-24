@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+{% load static %}
+{% load socialaccount %}
+<html>
+<head>
+  <title>Login - Propane Point</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --primary-orange: #FF8C42;
+      --primary-cyan: #00B4D8;
+      --dark-blue: #023E8A;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #FF8C42 0%, #FFB366 50%, #00B4D8 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+    
+    /* Animated background circles */
+    body::before,
+    body::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+      animation: float-background 20s ease-in-out infinite;
+    }
+    
+    body::before {
+      width: 300px;
+      height: 300px;
+      background: var(--primary-cyan);
+      top: -100px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+    
+    body::after {
+      width: 400px;
+      height: 400px;
+      background: var(--primary-orange);
+      bottom: -150px;
+      right: -150px;
+      animation-delay: 5s;
+    }
+    
+    @keyframes float-background {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(30px, -30px) scale(1.1); }
+      50% { transform: translate(-30px, 30px) scale(0.9); }
+      75% { transform: translate(20px, 20px) scale(1.05); }
+    }
+    
+    .login-container {
+      width: 450px;
+      max-width: 100%;
+      max-height: 95vh;
+      background: white;
+      border-radius: 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      z-index: 1;
+      animation: slideIn 0.6s ease-out;
+    }
+    
+    /* Custom scrollbar */
+    .login-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .login-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .login-container::-webkit-scrollbar-thumb {
+      background: var(--primary-cyan);
+      border-radius: 10px;
+    }
+    
+    .login-container::-webkit-scrollbar-thumb:hover {
+      background: #0096C7;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .login-header {
+      text-align: center;
+      padding: 40px 40px 20px;
+      background: linear-gradient(135deg, rgba(255,140,66,0.05) 0%, rgba(0,180,216,0.05) 100%);
+    }
+    
+    .logo-placeholder {
+      width: 150px;
+      height: 150px;
+      background: #f8f9fa;
+      border: 3px dashed #dee2e6;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0 auto 25px;
+      transition: all 0.3s;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .logo-placeholder:hover {
+      border-color: var(--primary-cyan);
+      background: rgba(0,180,216,0.05);
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    
+    .logo-placeholder img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+    
+    .welcome-text {
+      font-size: 24px;
+      color: var(--dark-blue);
+      font-weight: 700;
+      margin-bottom: 10px;
+      animation: fadeIn 0.8s ease-out 0.2s both;
+    }
+    
+    .subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin-bottom: 5px;
+      animation: fadeIn 0.8s ease-out 0.3s both;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .login-form {
+      padding: 25px 40px 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      animation: slideUp 0.6s ease-out both;
+    }
+    
+    .form-group:nth-child(1) { animation-delay: 0.3s; }
+    .form-group:nth-child(2) { animation-delay: 0.4s; }
+    .form-group:nth-child(3) { animation-delay: 0.5s; }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 700;
+      color: var(--dark-blue);
+      margin-bottom: 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.3s;
+      background: #f8f9fa;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-cyan);
+      box-shadow: 0 0 0 4px rgba(0,180,216,0.1);
+      background: white;
+      transform: translateY(-2px);
+    }
+    
+    .form-control:hover {
+      border-color: #c0c0c0;
+    }
+    
+    .errorlist {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0 0;
+    }
+    
+    .errorlist li {
+      color: #DC3545;
+      font-size: 13px;
+      font-weight: 600;
+      background: #fee;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    
+    .btn-login {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, #0096C7 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 6px 20px rgba(0,180,216,0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-login::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn-login:hover::before {
+      left: 100%;
+    }
+    
+    .btn-login:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,180,216,0.4);
+    }
+    
+    .btn-login:active {
+      transform: translateY(0);
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 25px 40px 20px;
+      position: relative;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #dee2e6, transparent);
+    }
+    
+    .divider span {
+      background: white;
+      padding: 0 15px;
+      color: #6c757d;
+      font-size: 13px;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .social-login {
+      padding: 0 40px 25px;
+      animation: fadeIn 0.8s ease-out 0.6s both;
+    }
+    
+    .btn-google {
+      width: 100%;
+      padding: 14px 20px;
+      background: white;
+      color: #333;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-decoration: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .btn-google:hover {
+      background: #f8f9fa;
+      border-color: #c0c0c0;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      color: #333;
+    }
+    
+    .btn-google:active {
+      transform: translateY(0);
+    }
+    
+    .google-icon {
+      width: 20px;
+      height: 20px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="%23EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="%234285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="%23FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="%2334A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>') center/contain no-repeat;
+    }
+    
+    .signup-link {
+      text-align: center;
+      padding: 0 40px 30px;
+      animation: fadeIn 0.8s ease-out 0.7s both;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 25px;
+    }
+    
+    .signup-link p {
+      color: #6c757d;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    
+    .btn-signup {
+      display: inline-block;
+      padding: 12px 40px;
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 25px;
+      font-weight: 700;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255,140,66,0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 13px;
+    }
+    
+    .btn-signup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255,140,66,0.4);
+      color: white;
+    }
+    
+    /* Alert messages */
+    .alert {
+      margin: 20px 40px 0;
+      border-radius: 12px;
+      animation: slideDown 0.5s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Responsive */
+    @media (max-width: 576px) {
+      .login-container {
+        width: 100%;
+        margin: 10px;
+      }
+      
+      .login-header {
+        padding: 30px 25px 20px;
+      }
+      
+      .login-form {
+        padding: 20px 25px 15px;
+      }
+      
+      .social-login {
+        padding: 0 25px 20px;
+      }
+      
+      .divider {
+        margin: 20px 25px 15px;
+      }
+      
+      .logo-placeholder {
+        width: 120px;
+        height: 120px;
+      }
+      
+      .signup-link {
+        padding: 20px 25px 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <div class="logo-placeholder">
+        <img src="{% static 'img/logo.png' %}" alt="Logo">
+      </div>
+      <p class="welcome-text">Welcome Back!</p>
+      <p class="subtitle">Sign in to continue your journey</p>
+    </div>
+    
+    <!-- Alert messages would go here -->
+    
+    <form method="post" class="login-form">
+      <div class="form-group">
+        <label for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" class="form-control" 
+               placeholder="Enter your username" required autofocus>
+      </div>
+      
+      <div class="form-group">
+        <label for="id_password">Password</label>
+        <input type="password" name="password" id="id_password" class="form-control" 
+               placeholder="Enter your password" required>
+      </div>
+      
+      <button type="submit" class="btn-login">
+        🔐 Log In
+      </button>
+    </form>
+    
+    <div class="divider">
+      <span>OR</span>
+    </div>
+    
+    <div class="social-login">
+      <a href="{% provider_login_url 'google' %}" class="btn-google">
+        <span class="google-icon"></span>
+        <span>Continue with Google</span>
+      </a>
+    </div>
+    
+    <div class="signup-link">
+      <p>Don't have an account?</p>
+      <a href="{% url 'signup' %}" class="btn-signup">Create Account</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTQQ-7JFM7iy0_8Cdeh_zq-IQpjCvrVYE",
+      authDomain: "propane-point.firebaseapp.com",
+      projectId: "propane-point",
+      storageBucket: "propane-point.firebasestorage.app",
+      messagingSenderId: "291811492263",
+      appId: "1:291811492263:web:dfe4b5e4bd6fdaaa617682",
+      measurementId: "G-CNQPM8V6W7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage Sellers - Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --primary-orange: #FF8C42;
+      --primary-cyan: #00B4D8;
+      --dark-blue: #023E8A;
+    }
+    
+    body {
+      background: #F8F9FA;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      width: 100%;
+      height: 85px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 4px solid #DC3545;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #DC3545 0%, #C82333 100%);
+      padding: 40px;
+      color: white;
+      margin-bottom: 40px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 30px 50px;
+    }
+    
+    .seller-card {
+      background: white;
+      border: 4px solid #dee2e6;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 25px;
+      transition: all 0.3s;
+      border-left: 8px solid #28A745;
+    }
+    
+    .seller-card:hover {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      transform: translateX(5px);
+      border-color: var(--primary-cyan);
+    }
+    
+    .seller-card.suspended {
+      border-left-color: #DC3545;
+      opacity: 0.7;
+    }
+    
+    .btn-suspend {
+      padding: 10px 25px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    
+    .btn-suspend-action {
+      background: #DC3545;
+    }
+    
+    .btn-suspend-action:hover {
+      background: #C82333;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .btn-reactivate {
+      background: #28A745;
+    }
+    
+    .btn-reactivate:hover {
+      background: #218838;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .status-badge {
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 13px;
+      display: inline-block;
+    }
+    
+    .status-active {
+      background: #D4EDDA;
+      color: #155724;
+    }
+    
+    .status-suspended {
+      background: #F8D7DA;
+      color: #721C24;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h2 style="color: var(--dark-blue); margin: 0; font-weight: 900;">Propane Point Admin</h2>
+    <div style="display: flex; gap: 20px;">
+      <a href="{% url 'admin_dashboard' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Dashboard</a>
+      <a href="{% url 'admin_applications' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Applications</a>
+      <a href="{% url 'admin_stores' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Stores</a>
+      <a href="{% url 'admin_orders' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Orders</a>
+      <a href="{% url 'map' %}" style="text-decoration: none; color: var(--dark-blue); font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#FF8C42'" onmouseout="this.style.color='#023E8A'">Map</a>
+      <a href="{% url 'logout' %}" style="text-decoration: none; color: #DC3545; font-weight: 700; transition: all 0.3s;" onmouseover="this.style.color='#C82333'" onmouseout="this.style.color='#DC3545'">Logout</a>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="container">
+      <h1 style="margin: 0; font-weight: 900;">Manage Sellers</h1>
+      <p style="margin: 10px 0 0 0;">View and manage all approved sellers</p>
+    </div>
+  </div>
+
+  <div class="container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="border-radius: 12px;">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Search Bar -->
+    <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+      <div style="position: relative;">
+        <input 
+          type="text" 
+          id="sellerSearch" 
+          placeholder="Search by name, email, or shop name..." 
+          style="width: 100%; padding: 15px 50px 15px 50px; border: 3px solid #dee2e6; border-radius: 12px; font-size: 15px; transition: all 0.3s;"
+          onfocus="this.style.borderColor='#00B4D8'"
+          onblur="this.style.borderColor='#dee2e6'"
+        />
+        <span style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 20px; color: #666;">🔍</span>
+        <button 
+          id="clearSellerSearch" 
+          style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); background: #e8eaed; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: none; font-size: 16px; color: #5f6368;"
+          onclick="document.getElementById('sellerSearch').value = ''; this.style.display = 'none'; filterSellers();"
+        >✕</button>
+      </div>
+      <div id="searchResults" style="margin-top: 15px; color: #666; font-size: 14px;"></div>
+    </div>
+
+    {% if sellers %}
+      <div id="sellersContainer">
+      {% for seller in sellers %}
+        <div class="seller-card {% if seller.status == 'suspended' %}suspended{% endif %}" 
+             data-name="{{ seller.user.username|lower }}" 
+             data-email="{{ seller.user.email|lower }}" 
+             data-stores="{% for store in seller.user.owned_stores.all %}{{ store.name|lower }} {% endfor %}">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h4 style="color: var(--dark-blue); font-weight: 800; margin-bottom: 10px;">
+                {{ seller.user.username }}
+              </h4>
+              <p style="margin: 5px 0; color: #666;"><strong>Email:</strong> {{ seller.user.email }}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Phone:</strong> {{ seller.phone|default:"Not provided" }}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Joined:</strong> {{ seller.created_at|date:"M d, Y" }}</p>
+              <p style="margin: 5px 0; color: #666;"><strong>Stores:</strong> 
+                {% for store in seller.user.owned_stores.all %}
+                  {{ store.name }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                  No stores
+                {% endfor %}
+              </p>
+              <p style="margin: 10px 0 0 0;">
+                <strong>Status:</strong>
+                <span class="status-badge {% if seller.status == 'approved' %}status-active{% else %}status-suspended{% endif %}">
+                  {% if seller.status == 'approved' %}Active{% else %}Suspended{% endif %}
+                </span>
+              </p>
+            </div>
+            <div class="col-md-4 text-end">
+              {% if seller.status == 'approved' %}
+                <a href="{% url 'admin_suspend_seller' seller.user.id %}" 
+                   class="btn-suspend btn-suspend-action"
+                   onclick="return confirm('Suspend this seller? All their stores will be deactivated.')">
+                  Suspend Seller
+                </a>
+              {% else %}
+                <a href="{% url 'admin_suspend_seller' seller.user.id %}" 
+                   class="btn-suspend btn-reactivate"
+                   onclick="return confirm('Reactivate this seller?')">
+                  Reactivate Seller
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+    {% else %}
+      <div style="background: white; border: 4px dashed #dee2e6; border-radius: 20px; padding: 60px; text-align: center;">
+        <div style="font-size: 80px; opacity: 0.3; margin-bottom: 20px;">👥</div>
+        <h4 style="color: #666;">No sellers yet</h4>
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // Real-time seller search
+    var searchInput = document.getElementById('sellerSearch');
+    var clearBtn = document.getElementById('clearSellerSearch');
+    var searchResults = document.getElementById('searchResults');
+    var sellerCards = document.querySelectorAll('.seller-card');
+
+    searchInput.addEventListener('input', function() {
+      var query = this.value.trim().toLowerCase();
+      
+      // Show/hide clear button
+      clearBtn.style.display = query ? 'block' : 'none';
+      
+      filterSellers();
+    });
+
+    function filterSellers() {
+      var query = searchInput.value.trim().toLowerCase();
+      var visibleCount = 0;
+      
+      sellerCards.forEach(function(card) {
+        var name = card.dataset.name;
+        var email = card.dataset.email;
+        var stores = card.dataset.stores;
+        
+        if (query === '' || name.includes(query) || email.includes(query) || stores.includes(query)) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      // Update search results text
+      if (query) {
+        searchResults.textContent = `Found ${visibleCount} seller(s) matching "${searchInput.value}"`;
+      } else {
+        searchResults.textContent = '';
+      }
+    }
+  </script>
+</body>
+</html>

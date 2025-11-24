@@ -1,0 +1,548 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Orders - Propane Point</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    :root {
+      --primary-orange: #FF8C42;
+      --primary-cyan: #00B4D8;
+      --dark-blue: #023E8A;
+      --light-bg: #F8F9FA;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    
+    /* Navbar */
+    .navbar {
+      width: 100%;
+      height: 85px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 4px solid var(--primary-orange);
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      text-decoration: none;
+    }
+    
+    .logo-icon {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+      margin-left: -15px;
+    }
+    
+    .logo-text-top {
+      font-size: 22px;
+      color: var(--primary-cyan);
+      font-weight: 600;
+      font-style: italic;
+      margin-bottom: 2px;
+    }
+    
+    .logo-text-bottom {
+      font-size: 32px;
+      color: var(--dark-blue);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+    
+    .nav-btn {
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      text-decoration: none;
+      position: relative;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark-blue);
+      border: 2px solid transparent;
+    }
+    
+    .nav-btn:hover {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255,140,66,0.4);
+    }
+    
+    .nav-btn.logout {
+      background: #DC3545;
+      color: white;
+      border: 2px solid #DC3545;
+    }
+    
+    .nav-btn.logout:hover {
+      background: #C82333;
+      border-color: #C82333;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: 3px;
+      right: 8px;
+      background: #DC3545;
+      color: white;
+      border-radius: 50%;
+      min-width: 20px;
+      height: 20px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 2px solid white;
+      padding: 0 5px;
+    }
+    
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      padding: 40px;
+      color: white;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 20px rgba(255,140,66,0.3);
+    }
+    
+    .page-header h1 {
+      margin: 0;
+      font-weight: 900;
+      font-size: 36px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .page-header p {
+      margin: 10px 0 0 0;
+      opacity: 0.95;
+      font-size: 18px;
+    }
+    
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 30px 50px;
+    }
+    
+    /* Order Cards */
+    .order-card {
+      background: white;
+      border: 4px solid #dee2e6;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 25px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .order-card:hover {
+      box-shadow: 0 10px 35px rgba(0,0,0,0.12);
+      transform: translateX(8px) translateY(-2px);
+    }
+    
+    /* Status-specific hover outlines */
+    .order-card.pending:hover {
+      border-color: var(--primary-orange);
+      box-shadow: 0 10px 35px rgba(255,140,66,0.18);
+      transform: translateX(8px) translateY(-2px);
+    }
+    
+    .order-card.pending_approval:hover {
+      border-color: var(--primary-cyan);
+      box-shadow: 0 10px 35px rgba(0,180,216,0.18);
+      transform: translateX(8px) translateY(-2px);
+    }
+    
+    .order-card.approved:hover {
+      border-color: #28A745;
+      box-shadow: 0 10px 35px rgba(40,167,69,0.14);
+      transform: translateX(8px) translateY(-2px);
+    }
+    
+    .order-card.cancelled:hover,
+    .order-card.rejected:hover {
+      border-color: #DC3545;
+      box-shadow: 0 10px 35px rgba(220,53,69,0.14);
+      transform: translateX(8px) translateY(-2px);
+    }
+    
+    .order-card.pending {
+      border-left: 8px solid var(--primary-orange);
+      background: linear-gradient(to right, rgba(255,140,66,0.05) 0%, white 100%);
+    }
+    
+    .order-card.pending_approval {
+      border-left: 8px solid var(--primary-cyan);
+      background: linear-gradient(to right, rgba(0,180,216,0.05) 0%, white 100%);
+    }
+    
+    .order-card.approved {
+      border-left: 8px solid #28A745;
+      background: linear-gradient(to right, rgba(40,167,69,0.05) 0%, white 100%);
+    }
+    
+    .order-card.rejected {
+      border-left: 8px solid #DC3545;
+      opacity: 0.7;
+      background: linear-gradient(to right, rgba(220,53,69,0.05) 0%, white 100%);
+    }
+    
+    .order-card.cancelled {
+      border-left: 8px solid #DC3545;
+      opacity: 0.7;
+      background: linear-gradient(to right, rgba(220,53,69,0.05) 0%, white 100%);
+    }
+    
+    .order-title {
+      color: var(--dark-blue);
+      font-weight: 800;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+    
+    .order-detail {
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #555;
+    }
+    
+    .order-detail strong {
+      color: var(--dark-blue);
+      font-weight: 700;
+    }
+    
+    /* Status Badges */
+    .status-badge {
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 800;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-pending {
+      background: linear-gradient(135deg, #FFF3CD 0%, #FFE69C 100%);
+      color: #856404;
+      border: 2px solid var(--primary-orange);
+    }
+    
+    .status-pending_approval {
+      background: linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%);
+      color: var(--primary-cyan);
+      border: 2px solid var(--primary-cyan);
+    }
+    
+    .status-approved {
+      background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%);
+      color: #28A745;
+      border: 2px solid #28A745;
+    }
+    
+    .status-cancelled, .status-rejected {
+      background: linear-gradient(135deg, #F8D7DA 0%, #F5C6CB 100%);
+      color: #DC3545;
+      border: 2px solid #DC3545;
+    }
+    
+    /* Buttons */
+    .btn-cancel {
+      background: linear-gradient(135deg, #DC3545 0%, #C82333 100%);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(220,53,69,0.3);
+    }
+    
+    .btn-cancel:hover {
+      background: linear-gradient(135deg, #C82333 0%, #BD2130 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(220,53,69,0.5);
+    }
+    
+    .rejection-box {
+      background: linear-gradient(135deg, #FFE0E0 0%, #FFB3B3 100%);
+      border: 3px solid #DC3545;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    
+    .rejection-box strong {
+      color: #721C24;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      background: white;
+      border: 4px solid var(--primary-cyan);
+      border-radius: 20px;
+      padding: 60px;
+      text-align: center;
+      box-shadow: 0 6px 25px rgba(0,180,216,0.2);
+    }
+    
+    .empty-state h4 {
+      color: var(--dark-blue);
+      font-weight: 800;
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+    
+    .empty-state p {
+      color: #666;
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, #0096C7 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 17px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(0,180,216,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 30px rgba(0,180,216,0.6);
+      color: white;
+    }
+    
+    .btn-back {
+      background: #6C757D;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      margin-bottom: 30px;
+    }
+    
+    .btn-back:hover {
+      background: #5A6268;
+      transform: translateY(-2px);
+      color: white;
+    }
+    
+    /* Alerts */
+    .alert {
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 30px;
+      font-weight: 600;
+      border: 3px solid;
+    }
+    .role-badge {
+      padding: 6px 15px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <a href="{% url 'map' %}" class="logo-container">
+      <div class="logo-icon">
+        <img src="{% static 'img/logo.png' %}" alt="Propane Point Logo" class="logo-img">
+      </div>
+      <div class="logo-text">
+        <div class="logo-text-top">Propane</div>
+        <div class="logo-text-bottom">POINT</div>
+      </div>
+    </a>
+    <div class="nav-buttons">
+    {% if request.user.profile.role == 'admin' %}
+      <span class="role-badge role-admin">👑 ADMIN</span>
+      <a href="{% url 'admin_dashboard' %}" class="nav-btn">Admin Dashboard</a>
+    {% elif request.user.profile.role == 'seller' %}
+        <span class="role-badge role-seller">🏪 SELLER</span>
+        <a href="{% url 'my_stores' %}" class="nav-btn">My Stores</a>
+    {% else %}
+      <a href="{% url 'my_orders' %}" class="nav-btn">My Orders</a>
+    {% endif %}
+      <a href="{% url 'notifications' %}" class="nav-btn">
+        Notifications
+        {% if unread_count > 0 %}
+        <span class="notification-badge">{{ unread_count }}</span>
+        {% endif %}
+    
+      </a>
+      <a href="{% url 'logout' %}" class="nav-btn logout">Logout</a>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <h1>📦 My Orders</h1>
+      <p>Track your propane tank orders</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <a href="{% url 'map' %}" class="btn-back">← Back to Map</a>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% if orders %}
+      {% for order in orders %}
+        <div class="order-card {{ order.status }}">
+          <div class="row">
+            <div class="col-md-8">
+              <h5 class="order-title">{{ order.tank.tank_type }}</h5>
+              <p class="order-detail"><strong>Order ID:</strong> #{{ order.id }}</p>
+              <p class="order-detail"><strong>Store:</strong> {{ order.store.name }}</p>
+              <p class="order-detail"><strong>Buyer:</strong> {{ order.name }}</p>
+              <p class="order-detail"><strong>Price:</strong> ₱{{ order.tank.price }}</p>
+              <p class="order-detail"><strong>Ordered:</strong> {{ order.created_at|date:"M d, Y g:i A" }}</p>
+              
+              {% if order.status == 'rejected' and order.rejection_reason %}
+              <div class="rejection-box">
+                <strong>❌ Pickup Proof Rejected:</strong> {{ order.rejection_reason }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-4 text-end">
+              <span class="status-badge status-{{ order.status }}">
+                {{ order.get_status_display }}
+              </span>
+              
+              {% if order.status == 'pending' %}
+                <p style="margin-top: 20px; color: var(--primary-orange); font-weight: 700;">
+                  ⏳ Waiting for seller to upload pickup proof...
+                </p>
+                <form method="post" action="{% url 'cancel_order' order.id %}" style="margin-top: 10px;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-cancel" onclick="return confirm('Are you sure you want to cancel this order?')">
+                    Cancel Order
+                  </button>
+                </form>
+              {% elif order.status == 'pending_approval' %}
+                <p style="margin-top: 20px; color: var(--primary-cyan); font-weight: 700;">
+                  ⏳ Seller uploaded proof. Waiting for admin approval...
+                </p>
+              {% elif order.status == 'approved' %}
+                <p style="margin-top: 20px; color: #28A745; font-weight: 700;">
+                  ✅ Order completed and verified!
+                </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <h4>No orders yet</h4>
+        <p>Start browsing stores on the map to make your first order!</p>
+        <a href="{% url 'map' %}" class="btn-primary">Browse Stores</a>
+      </div>
+    {% endif %}
+  </div>
+</body>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, ... } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTQQ-7JFM7iy0_8Cdeh_zq-IQpjCvrVYE",
+    authDomain: "propane-point.firebaseapp.com",
+    projectId: "propane-point",
+    storageBucket: "propane-point.firebasestorage.app",
+    messagingSenderId: "291811492263",
+    appId: "1:291811492263:web:dfe4b5e4bd6fdaaa617682",
+    measurementId: "G-CNQPM8V6W7"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Store - Propane Point</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    :root {
+      --primary-orange: #FF8C42;
+      --primary-cyan: #00B4D8;
+      --dark-blue: #023E8A;
+    }
+    
+    body {
+      background: #F8F9FA;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #FFB366 100%);
+      padding: 30px;
+      color: white;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    #map { 
+      height: 400px; 
+      width: 100%; 
+      margin-bottom: 30px; 
+      border-radius: 15px; 
+      border: 4px solid var(--primary-cyan);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .form-control, .form-select {
+      border: 2px solid #dee2e6;
+      border-radius: 10px;
+      padding: 12px;
+      transition: all 0.3s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-cyan);
+      box-shadow: 0 0 0 3px rgba(0,180,216,0.1);
+    }
+    
+    .tank-section {
+      border: 3px solid #dee2e6;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      display: none;
+      background: white;
+      transition: all 0.3s;
+    }
+    
+    .tank-section.active {
+      display: block;
+      border-color: var(--primary-cyan);
+      background: linear-gradient(135deg, #E0F7FA 0%, #F8F9FA 100%);
+      box-shadow: 0 4px 15px rgba(0,180,216,0.2);
+    }
+    
+    .photo-preview {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 50%;
+      border: 4px solid var(--primary-orange);
+      margin-top: 15px;
+      display: none;
+    }
+    
+    .btn-submit {
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, #0096C7 100%);
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 16px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,180,216,0.3);
+    }
+    
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,180,216,0.4);
+    }
+    
+    .alert-info {
+      background: linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%);
+      border: 3px solid var(--primary-cyan);
+      border-radius: 12px;
+      color: var(--dark-blue);
+      font-weight: 600;
+    }
+    
+    .form-check-input:checked {
+      background-color: var(--primary-cyan);
+      border-color: var(--primary-cyan);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="container">
+      <h2 style="margin: 0; font-weight: 800;">🏪 Create Your Store</h2>
+      <p style="margin: 5px 0 0 0; opacity: 0.9;">Set up your propane business</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="alert alert-info">
+      📍 Click on the map to set your store location (or it will auto-detect your position)
+    </div>
+
+    <form method="post" id="storeForm" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <div id="map"></div>
+      
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label" style="font-weight: 700; color: var(--dark-blue);">Store Name *</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+            <div class="text-danger">{{ form.name.errors }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="col-md-6 mb-3">
+          <label class="form-label" style="font-weight: 700; color: var(--dark-blue);">Your Photo * (Required)</label>
+          {{ form.owner_photo }}
+          <img id="photoPreview" class="photo-preview" alt="Photo preview">
+          <small class="text-muted d-block mt-1">Upload a clear photo of yourself (Store owner)</small>
+          {% if form.owner_photo.errors %}
+            <div class="text-danger">{{ form.owner_photo.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label class="form-label" style="font-weight: 700; color: var(--dark-blue);">Description</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div class="text-danger">{{ form.description.errors }}</div>
+        {% endif %}
+      </div>
+      
+      {{ form.latitude }}
+      {{ form.longitude }}
+      
+      <div class="mb-3">
+        <label class="form-label" style="font-weight: 700; color: var(--dark-blue); font-size: 18px;">
+          Select Tanks to Sell *
+        </label>
+        {{ form.tanks_to_sell }}
+        {% if form.tanks_to_sell.errors %}
+          <div class="text-danger">{{ form.tanks_to_sell.errors }}</div>
+        {% endif %}
+      </div>
+      
+      <!-- A/S Valve Gasul Section -->
+      <div class="tank-section" id="as-valve-section">
+        <h5 style="color: var(--dark-blue); font-weight: 800;">🔧 A/S Valve Gasul</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <label style="font-weight: 600;">Price (₱)</label>
+            {{ form.as_valve_price }}
+          </div>
+          <div class="col-md-6">
+            <label style="font-weight: 600;">Initial Stock</label>
+            {{ form.as_valve_stock }}
+          </div>
+        </div>
+      </div>
+      
+      <!-- POL Valve Gasul Section -->
+      <div class="tank-section" id="pol-valve-section">
+        <h5 style="color: var(--dark-blue); font-weight: 800;">🔧 POL Valve Gasul</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <label style="font-weight: 600;">Price (₱)</label>
+            {{ form.pol_valve_price }}
+          </div>
+          <div class="col-md-6">
+            <label style="font-weight: 600;">Initial Stock</label>
+            {{ form.pol_valve_stock }}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Price Gas Section -->
+      <div class="tank-section" id="price-gas-section">
+        <h5 style="color: var(--dark-blue); font-weight: 800;">⚡ Price Gas</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <label style="font-weight: 600;">Price (₱)</label>
+            {{ form.price_gas_price }}
+          </div>
+          <div class="col-md-6">
+            <label style="font-weight: 600;">Initial Stock</label>
+            {{ form.price_gas_stock }}
+          </div>
+        </div>
+      </div>
+      
+      {% if form.errors %}
+        <div class="alert alert-danger">
+          <strong>Please fix the following errors:</strong>
+          <ul>
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <li>{{ field }}: {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      
+      <button type="submit" class="btn-submit">🚀 Create Store</button>
+      <a href="{% url 'map' %}" class="btn btn-secondary" style="margin-left: 15px; padding: 14px 30px; border-radius: 12px; font-weight: 700;">Cancel</a>
+    </form>
+  </div>
+
+  <script>
+    // Photo preview
+    document.getElementById('id_owner_photo').addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var preview = document.getElementById('photoPreview');
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    // Initialize map
+    var bounds = L.latLngBounds(
+      [11.703424206095782, 124.42041594897537],
+      [11.707838387133082, 124.42834292722303]
+    );
+    
+    var map = L.map('map').setView([11.706149247057967, 124.42393797354536], 17);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+    
+    var marker = null;
+    
+    // Get user's location automatically
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        
+        // Check if within bounds
+        if (lat >= bounds.getSouth() && lat <= bounds.getNorth() && 
+            lng >= bounds.getWest() && lng <= bounds.getEast()) {
+          map.setView([lat, lng], 17);
+          placeMarker(lat, lng);
+        }
+      });
+    }
+    
+    map.on('click', function(e) {
+      placeMarker(e.latlng.lat, e.latlng.lng);
+    });
+    
+    function placeMarker(lat, lng) {
+      if (marker) {
+        marker.setLatLng([lat, lng]);
+      } else {
+        marker = L.marker([lat, lng]).addTo(map);
+      }
+      
+      document.getElementById('id_latitude').value = lat;
+      document.getElementById('id_longitude').value = lng;
+    }
+    
+    // Show/hide tank sections based on checkbox selection
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+      checkbox.addEventListener('change', function() {
+        var value = this.value;
+        var sectionId = '';
+        
+        if (value === 'A/S Valve Gasul') {
+          sectionId = 'as-valve-section';
+        } else if (value === 'POL Valve Gasul') {
+          sectionId = 'pol-valve-section';
+        } else if (value === 'Price Gas') {
+          sectionId = 'price-gas-section';
+        }
+        
+        var section = document.getElementById(sectionId);
+        if (this.checked) {
+          section.classList.add('active');
+        } else {
+          section.classList.remove('active');
+        }
+      });
+    });
+    
+    // Validate form
+    document.getElementById('storeForm').addEventListener('submit', function(e) {
+      if (!document.getElementById('id_latitude').value) {
+        e.preventDefault();
+        alert('Please click on the map to set your store location!');
+        return false;
+      }
+      
+      if (!document.getElementById('id_owner_photo').files.length) {
+        e.preventDefault();
+        alert('Please upload your photo! This is required.');
+        return false;
+      }
+    });
+  </script>
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, ... } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTQQ-7JFM7iy0_8Cdeh_zq-IQpjCvrVYE",
+    authDomain: "propane-point.firebaseapp.com",
+    projectId: "propane-point",
+    storageBucket: "propane-point.firebasestorage.app",
+    messagingSenderId: "291811492263",
+    appId: "1:291811492263:web:dfe4b5e4bd6fdaaa617682",
+    measurementId: "G-CNQPM8V6W7"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+</body>
+</html>
