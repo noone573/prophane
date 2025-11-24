@@ -175,7 +175,7 @@ def notify_store_owner(sender, instance, created, **kwargs):
     if created and not instance.is_notified:
         Notification.objects.create(
             user=instance.store.owner,
-            message=f"New order! {instance.name} purchased {instance.tank.tank_type} from {instance.store.name}. Pickup before {instance.expires_at.strftime('%b %d, %Y %I:%M %p')}",
+            message=f"🛒 New order #{instance.id}! {instance.name} purchased {instance.tank.tank_type} from {instance.store.name}. Please confirm pickup and upload proof.",
             reservation=instance
         )
         instance.is_notified = True
