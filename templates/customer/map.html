@@ -724,7 +724,7 @@
           type: "{{ tank.tank_type|escapejs }}",
           price: {{ tank.price }},
           stock: {{ tank.stock }},
-          image: "https://via.placeholder.com/120x120/FF8C42/FFFFFF?text=GAS"
+          image:"{% static 'img/11kg.png' %}"
         }{% if not forloop.last %},{% endif %}
         {% endif %}
         {% endfor %}
