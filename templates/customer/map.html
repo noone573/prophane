@@ -714,7 +714,7 @@
       lng: {{ store.longitude }},
       description: "{{ store.description|escapejs }}",
       owner: "{{ store.owner.username|escapejs }}",
-      ownerPhoto: "{{ store.owner_photo.url }}",
+      ownerPhoto: "{% if store.owner_photo %}{{ store.owner_photo.url }}{% else %}{% static 'img/default.png' %}{% endif %}",
       tanks: [
         {% for tank in store.tanks.all %}
         {% if tank.is_active %}
