@@ -333,7 +333,7 @@ def delete_store(request, store_id):
         messages.success(request, f"Store '{store_name}' deleted.")
         return redirect("my_stores")
     
-    return render(request, "confirm_delete_store.html", {"store": store})
+    return render(request, "comfirm_delete_store.html", {"store": store})
 
 
 # ==================== SELLER - Upload Pickup Proof ====================
