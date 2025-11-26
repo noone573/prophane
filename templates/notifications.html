@@ -297,7 +297,8 @@
       {% if request.user.profile.role == 'seller' %}
         <a href="{% url 'my_stores' %}" class="nav-btn">My Stores</a>
       {% endif %}
-      <a href="{% url 'my_orders' %}" class="nav-btn">My Orders</a>
+      <a href="{% url 'my_orders' %}" class="nav-btn">My Reservations</a>
+      <a href="{% url 'map' %}" class="nav-btn">Map</a>
       <a href="{% url 'notifications' %}" class="nav-btn">
         Notifications
         {% if unread_count > 0 %}
