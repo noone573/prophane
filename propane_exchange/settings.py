@@ -34,6 +34,11 @@ CSRF_TRUSTED_ORIGINS = [
     'https://prophane.onrender.com',
 ]
 
+# Send our origin (not full URLs) to other sites. OpenStreetMap blocks map
+# tile requests that arrive without a Referer, and Django's default
+# 'same-origin' policy strips it.
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
 # Render sets this to the service's own hostname, so a renamed service still works
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
