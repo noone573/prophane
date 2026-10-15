@@ -33,8 +33,17 @@ ALLOWED_HOSTS = ['prophane.onrender.com', 'localhost', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = [
     'https://prophane.onrender.com',
 ]
+
+# Render sets this to the service's own hostname, so a renamed service still works
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
+
 if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # Render terminates HTTPS and forwards plain HTTP; trust its header so
+    # SECURE_SSL_REDIRECT doesn't redirect forever.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -105,10 +114,21 @@ WSGI_APPLICATION = 'propane_exchange.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-if 'DATABASE_URL' in os.environ:
+# On Render this is the Supabase Postgres connection string
+# (Supabase dashboard > Connect > Session pooler).
+DATABASE_URL = config('DATABASE_URL', default='') or config('SUPABASE_DB_URL', default='')
+
+if DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=60,
+            conn_health_checks=True,
+            ssl_require='sqlite' not in DATABASE_URL,
+        )
     }
+    # Supabase's transaction pooler (port 6543) can't hold server-side cursors
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
 else:
     DATABASES = {
         'default': {
@@ -163,6 +183,31 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Supabase Storage for uploads (photos, seller documents, pickup proofs).
+# Without these, uploads go to the local media/ folder (fine for local dev).
+SUPABASE_URL = config('SUPABASE_URL', default='')
+SUPABASE_KEY = (
+    config('SUPABASE_SERVICE_ROLE_KEY', default='')
+    or config('SUPABASE_KEY', default='')
+)
+SUPABASE_BUCKET = config('SUPABASE_BUCKET', default='media')
+USE_SUPABASE_STORAGE = bool(SUPABASE_URL and SUPABASE_KEY)
+
+STORAGES = {
+    'default': {
+        'BACKEND': (
+            'store.storage.SupabaseStorage' if USE_SUPABASE_STORAGE
+            else 'django.core.files.storage.FileSystemStorage'
+        ),
+    },
+    'staticfiles': {
+        'BACKEND': (
+            'whitenoise.storage.CompressedManifestStaticFilesStorage' if not DEBUG
+            else 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        ),
+    },
+}
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -173,9 +218,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ==============================================================================
 
 # Account settings
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # Allow login with username or email
-ACCOUNT_EMAIL_REQUIRED = False  # Email not required for signup
-ACCOUNT_USERNAME_REQUIRED = True  # Username is required
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}  # Allow login with username or email
+# Username required, email optional
+ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'  # Don't require email verification
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False
 ACCOUNT_UNIQUE_EMAIL = True
