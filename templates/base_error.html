@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="error-page">
+  <div class="stack">
+    <p class="error-code">{% block code %}{% endblock %}</p>
+    <h1>{% block heading %}{% endblock %}</h1>
+    <p class="muted">{% block message %}{% endblock %}</p>
+    <p><a class="btn btn-primary" href="/">Go to Propane Point</a></p>
+  </div>
+</main>
+{% endblock %}

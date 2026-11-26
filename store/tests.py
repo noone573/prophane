@@ -3,7 +3,7 @@ from unittest import mock
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from .models import PropaneTank, Store
 from .storage import SupabaseStorage
@@ -68,6 +68,7 @@ class SupabaseStorageTests(TestCase):
         self.assertFalse(self.storage.ensure_bucket())
 
 
+@override_settings(SECURE_SSL_REDIRECT=False)
 class SeedShopsTests(TestCase):
     def test_seed_shops_is_repeatable(self):
         call_command('seed_shops', stdout=mock.Mock())
@@ -89,3 +90,4 @@ class SeedShopsTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Juan")
         self.assertContains(resp, 'img/default.png')
+        self.assertContains(resp, 'id="stores-data"')

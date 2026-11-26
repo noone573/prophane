@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static ui %}
+{% block body %}
+<div class="auth-body">
+  <aside class="auth-aside">
+    <a class="brand" href="{% url 'home' %}">
+      <img src="{% static 'img/logo.png' %}" alt="" width="36" height="36">
+      <span>Propane Point<small>LPG near you</small></span>
+    </a>
+    <div>
+      <h2>Reserve a gas refill from a store down the street.</h2>
+      <ul>
+        <li>{% icon 'map' %} See which nearby stores have tanks in stock</li>
+        <li>{% icon 'clock' %} Reserve now, pick up when it suits you</li>
+        <li>{% icon 'shield' %} Every seller is checked before they can list</li>
+      </ul>
+    </div>
+    <p class="small fine">&copy; {% now "Y" %} Propane Point</p>
+  </aside>
+  <main class="auth-main">
+    <div class="auth-card">
+      {% include "partials/messages.html" %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+{% endblock %}

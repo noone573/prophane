@@ -1,0 +1,26 @@
+{% load static ui %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>{% block title %}Propane Point{% endblock %} · Propane Point</title>
+  <meta name="description" content="Find LPG refills near you and reserve a tank for pickup.">
+  <link rel="icon" href="{% static 'img/logo.png' %}">
+  {% block head_css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% block body %}
+    {% include "partials/topbar.html" %}
+    <main class="page {% block page_class %}{% endblock %}">
+      {% include "partials/messages.html" %}
+      {% block content %}{% endblock %}
+    </main>
+  {% endblock %}
+  <script src="{% static 'js/app.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+  {% block extra_body %}{% endblock %}
+</body>
+</html>

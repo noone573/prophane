@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# exit on error
+
 set -o errexit
 
 pip install --upgrade pip
@@ -20,7 +20,7 @@ password = os.environ.get('ADMIN_PASSWORD')
 admin = User.objects.filter(username='admin').first()
 
 if admin is None and not password:
-    print('⚠️  ADMIN_PASSWORD is not set, skipping admin user creation')
+    print('ADMIN_PASSWORD is not set; skipping admin user creation.')
 else:
     if admin is None:
         admin = User.objects.create_superuser(
@@ -28,18 +28,18 @@ else:
             email='admin@propanepoint.com',
             password=password,
         )
-        print('✅ Admin user created (username: admin)')
+        print('Admin user created (username: admin).')
     elif password and not admin.check_password(password):
         admin.set_password(password)
         admin.save()
-        print('✅ Admin password updated from ADMIN_PASSWORD')
+        print('Admin password updated from ADMIN_PASSWORD.')
     else:
-        print('✅ Admin user already exists')
+        print('Admin user already exists.')
 
     profile = admin.profile
     if profile.role != 'admin' or profile.status != 'approved':
         profile.role = 'admin'
         profile.status = 'approved'
         profile.save()
-        print('✅ Admin role updated!')
+        print('Admin role updated.')
 END

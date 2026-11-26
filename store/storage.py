@@ -42,7 +42,6 @@ class SupabaseStorage(Storage):
             'apikey': self.key,
         })
 
-    # ---------- helpers ----------
 
     def _api(self, path):
         return f'{self.base_url}/storage/v1/{path}'
@@ -53,7 +52,6 @@ class SupabaseStorage(Storage):
     def _clean(self, name):
         return name.replace('\\', '/').lstrip('/')
 
-    # ---------- Storage API ----------
 
     def _open(self, name, mode='rb'):
         name = self._clean(name)

@@ -51,22 +51,21 @@ class PropaneTankAdmin(admin.ModelAdmin):
     
     def stock_status(self, obj):
         if obj.stock == 0:
-            return '🔴 Out of Stock'
-        elif obj.stock <= 5:
-            return '🟡 Low Stock'
-        elif obj.stock <= 10:
-            return '🟠 Medium Stock'
-        else:
-            return '🟢 In Stock'
+            return 'Out of stock'
+        if obj.stock <= 5:
+            return 'Low'
+        if obj.stock <= 10:
+            return 'Medium'
+        return 'In stock'
     stock_status.short_description = 'Stock Status'
 
 
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'name', 'store', 'store_owner', 'tank', 'created_at', 'total_price', 'is_notified')
-    list_filter = ('store', 'created_at', 'tank__tank_type', 'is_notified')
+    list_display = ('id', 'user', 'name', 'store', 'store_owner', 'tank', 'quantity', 'status', 'created_at', 'total_price', 'is_notified')
+    list_filter = ('status', 'store', 'created_at', 'tank__tank_type')
     search_fields = ('user__username', 'name', 'store__name', 'store__owner__username')
-    readonly_fields = ('user', 'store', 'tank', 'name', 'created_at', 'is_notified')
+    readonly_fields = ('user', 'store', 'tank', 'name', 'quantity', 'unit_price', 'created_at', 'is_notified')
     date_hierarchy = 'created_at'
     list_per_page = 20
     
@@ -75,7 +74,7 @@ class ReservationAdmin(admin.ModelAdmin):
             'fields': ('user', 'name')
         }),
         ('Reservation Details', {
-            'fields': ('store', 'tank', 'created_at')
+            'fields': ('store', 'tank', 'quantity', 'unit_price', 'status', 'created_at')
         }),
         ('Notification Status', {
             'fields': ('is_notified',)
@@ -87,15 +86,13 @@ class ReservationAdmin(admin.ModelAdmin):
     store_owner.short_description = 'Store Owner'
     
     def total_price(self, obj):
-        return f'₱{obj.tank.price}'
+        return f'₱{obj.total_price:,.2f}'
     total_price.short_description = 'Price'
     
     def has_add_permission(self, request):
-        # Prevent manual creation of reservations in admin
         return False
     
     def has_delete_permission(self, request, obj=None):
-        # Only superusers can delete reservations
         return request.user.is_superuser
 
 
@@ -119,11 +116,9 @@ class NotificationAdmin(admin.ModelAdmin):
     message_preview.short_description = 'Message'
     
     def has_add_permission(self, request):
-        # Notifications are created automatically
         return False
 
 
-# Optional: Customize admin site header and title
 admin.site.site_header = "Propane Point Administration"
 admin.site.site_title = "Propane Point Admin"
-admin.site.index_title = "Welcome to Propane Point Admin Panel"
+admin.site.index_title = "Site administration"

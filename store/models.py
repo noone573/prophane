@@ -4,8 +4,10 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from datetime import timedelta
+from decimal import Decimal
 
-# Extend User model with profile
+from .validators import RandomFilename
+
 class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('customer', 'Customer'),
@@ -41,7 +43,6 @@ class UserProfile(models.Model):
         return self.is_seller() or self.is_admin()
 
 
-# Seller Application for approval
 class SellerApplication(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending Review'),
@@ -52,10 +53,10 @@ class SellerApplication(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='seller_application')
     business_name = models.CharField(max_length=200)
     business_address = models.TextField()
-    business_permit = models.FileField(upload_to='seller_documents/permits/')
-    dti_certificate = models.FileField(upload_to='seller_documents/dti/', blank=True, null=True)
-    mayors_permit = models.FileField(upload_to='seller_documents/mayors/', blank=True, null=True)
-    valid_id = models.FileField(upload_to='seller_documents/ids/')
+    business_permit = models.FileField(upload_to=RandomFilename('seller_documents/permits'))
+    dti_certificate = models.FileField(upload_to=RandomFilename('seller_documents/dti'), blank=True, null=True)
+    mayors_permit = models.FileField(upload_to=RandomFilename('seller_documents/mayors'), blank=True, null=True)
+    valid_id = models.FileField(upload_to=RandomFilename('seller_documents/ids'))
     tin_number = models.CharField(max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=15)
     email = models.EmailField()
@@ -78,7 +79,7 @@ class Store(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     description = models.TextField(default="Quality propane gas supplier")
-    owner_photo = models.ImageField(upload_to='store_owners/', help_text="Upload your photo")
+    owner_photo = models.ImageField(upload_to=RandomFilename('store_owners'), help_text="Upload your photo")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -119,10 +120,13 @@ class Reservation(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     tank = models.ForeignKey(PropaneTank, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    quantity = models.PositiveSmallIntegerField(default=1)
+    # Price at the time of ordering, so later price edits don't rewrite history
+    unit_price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    
-    # Pickup proof fields (uploaded by SELLER)
-    pickup_proof = models.ImageField(upload_to='pickup_proofs/', null=True, blank=True)
+
+    # Uploaded by the seller once the customer has collected the tank
+    pickup_proof = models.ImageField(upload_to=RandomFilename('pickup_proofs'), null=True, blank=True)
     pickup_proof_uploaded_at = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField(blank=True, null=True)
     reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_reservations')
@@ -131,8 +135,15 @@ class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_notified = models.BooleanField(default=False)
 
+    @property
+    def price_each(self):
+        return self.unit_price if self.unit_price is not None else self.tank.price
+
+    @property
+    def total_price(self):
+        return (self.price_each or Decimal('0')) * self.quantity
+
     def can_upload_proof(self):
-        """Seller can upload pickup proof when status is pending or rejected"""
         return self.status in ['pending', 'rejected']
     
     def needs_admin_review(self):
@@ -156,48 +167,23 @@ class Notification(models.Model):
         return f"Notification for {self.user.username}"
 
 
-# Signal to create user profile automatically
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance, role='customer')
+        UserProfile.objects.get_or_create(user=instance, defaults={'role': 'customer'})
 
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, 'profile'):
-        instance.profile.save()
-
-
-# Signal to notify store owner when a reservation is made
 @receiver(post_save, sender=Reservation)
 def notify_store_owner(sender, instance, created, **kwargs):
     if created and not instance.is_notified:
         Notification.objects.create(
             user=instance.store.owner,
-            message=f"🛒 New order #{instance.id}! {instance.name} purchased {instance.tank.tank_type} from {instance.store.name}. Please confirm pickup and upload proof.",
-            reservation=instance
+            message=(
+                f"New order #{instance.id}: {instance.name} reserved "
+                f"{instance.quantity} x {instance.tank.tank_type} at {instance.store.name}. "
+                "Upload a pickup photo once the customer collects it."
+            ),
+            reservation=instance,
         )
+        Reservation.objects.filter(pk=instance.pk).update(is_notified=True)
         instance.is_notified = True
-        instance.save()
-
-
-# Signal to notify user when seller application status changes
-@receiver(post_save, sender=SellerApplication)
-def notify_application_status(sender, instance, created, **kwargs):
-    if not created and instance.status in ['approved', 'rejected']:
-        if instance.status == 'approved':
-            # Update user profile to seller
-            profile = instance.user.profile
-            profile.role = 'seller'
-            profile.status = 'approved'
-            profile.save()
-            
-            message = f"Congratulations! Your seller application for '{instance.business_name}' has been APPROVED. You can now create stores!"
-        else:
-            message = f"Your seller application for '{instance.business_name}' has been rejected. Reason: {instance.rejection_reason}"
-        
-        Notification.objects.create(
-            user=instance.user,
-            message=message
-        )
