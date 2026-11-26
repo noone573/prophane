@@ -1,36 +1,36 @@
 {% load static ui %}
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="{% url 'dashboard' %}">
+    <a class="brand" href="{% url 'dashboard' %}" aria-label="Propane Point home">
       <img src="{% static 'img/logo.png' %}" alt="" width="36" height="36">
-      <span>Propane Point{% if user_role == 'admin' %}<small>Admin</small>{% elif user_role == 'seller' and user_status == 'approved' %}<small>Seller</small>{% endif %}</span>
+      <span class="brand-text">Propane Point{% if user_role == 'admin' %}<small>Admin</small>{% elif user_role == 'seller' and user_status == 'approved' %}<small>Seller</small>{% endif %}</span>
     </a>
     <nav class="nav" aria-label="Main">
       {% if user_role == 'admin' %}
-        <a href="{% url 'admin_dashboard' %}" {% current 'admin_dashboard' %}>{% icon 'grid' %}<span>Overview</span></a>
-        <a href="{% url 'admin_applications' %}" {% current 'admin_applications' 'admin_review_application' %}>{% icon 'file' %}<span>Applications</span></a>
-        <a href="{% url 'admin_sellers' %}" {% current 'admin_sellers' %}>{% icon 'users' %}<span>Sellers</span></a>
-        <a href="{% url 'admin_stores' %}" {% current 'admin_stores' %}>{% icon 'store' %}<span>Stores</span></a>
-        <a href="{% url 'admin_orders' %}" {% current 'admin_orders' 'admin_review_pickup' %}>{% icon 'box' %}<span>Orders</span></a>
-        <a href="{% url 'map' %}" {% current 'map' 'store_detail' %}>{% icon 'map' %}<span>Map</span></a>
+        <a href="{% url 'admin_dashboard' %}" title="Overview" {% current 'admin_dashboard' %}>{% icon 'grid' %}<span class="nav-label">Overview</span></a>
+        <a href="{% url 'admin_applications' %}" title="Applications" {% current 'admin_applications' 'admin_review_application' %}>{% icon 'file' %}<span class="nav-label">Applications</span></a>
+        <a href="{% url 'admin_sellers' %}" title="Sellers" {% current 'admin_sellers' %}>{% icon 'users' %}<span class="nav-label">Sellers</span></a>
+        <a href="{% url 'admin_stores' %}" title="Stores" {% current 'admin_stores' %}>{% icon 'store' %}<span class="nav-label">Stores</span></a>
+        <a href="{% url 'admin_orders' %}" title="Orders" {% current 'admin_orders' 'admin_review_pickup' %}>{% icon 'box' %}<span class="nav-label">Orders</span></a>
+        <a href="{% url 'map' %}" title="Map" {% current 'map' 'store_detail' %}>{% icon 'map' %}<span class="nav-label">Map</span></a>
       {% else %}
-        <a href="{% url 'map' %}" {% current 'map' 'store_detail' %}>{% icon 'map' %}<span>Find gas</span></a>
-        <a href="{% url 'my_orders' %}" {% current 'my_orders' 'receipt' %}>{% icon 'bag' %}<span>My orders</span></a>
+        <a href="{% url 'map' %}" title="Find gas" {% current 'map' 'store_detail' %}>{% icon 'map' %}<span class="nav-label">Find gas</span></a>
+        <a href="{% url 'my_orders' %}" title="My orders" {% current 'my_orders' 'receipt' %}>{% icon 'bag' %}<span class="nav-label">My orders</span></a>
         {% if user_role == 'seller' and user_status == 'approved' %}
-          <a href="{% url 'my_stores' %}" {% current 'my_stores' 'manage_store' 'create_store' 'upload_pickup_proof' 'delete_store' %}>{% icon 'store' %}<span>My stores</span></a>
+          <a href="{% url 'my_stores' %}" title="My stores" {% current 'my_stores' 'manage_store' 'create_store' 'upload_pickup_proof' 'delete_store' %}>{% icon 'store' %}<span class="nav-label">My stores</span></a>
         {% elif user_role == 'seller' %}
-          <a href="{% url 'seller_pending' %}" {% current 'seller_pending' %}>{% icon 'store' %}<span>Seller account</span></a>
+          <a href="{% url 'seller_pending' %}" title="Seller account" {% current 'seller_pending' %}>{% icon 'store' %}<span class="nav-label">Seller account</span></a>
         {% else %}
-          <a href="{% url 'apply_seller' %}" {% current 'apply_seller' 'seller_pending' %}>{% icon 'store' %}<span>Sell on Propane Point</span></a>
+          <a href="{% url 'apply_seller' %}" title="Sell on Propane Point" {% current 'apply_seller' 'seller_pending' %}>{% icon 'store' %}<span class="nav-label">Sell on Propane Point</span></a>
         {% endif %}
       {% endif %}
       <span class="spacer"></span>
-      <a href="{% url 'notifications' %}" {% current 'notifications' %} aria-label="Notifications{% if unread_count %}, {{ unread_count }} unread{% endif %}">
-        {% icon 'bell' %}<span class="label-optional">Notifications</span>{% if unread_count %}<span class="count">{{ unread_count }}</span>{% endif %}
+      <a href="{% url 'notifications' %}" title="Notifications" {% current 'notifications' %} aria-label="Notifications{% if unread_count %}, {{ unread_count }} unread{% endif %}">
+        {% icon 'bell' %}<span class="nav-label label-optional">Notifications</span>{% if unread_count %}<span class="count">{{ unread_count }}</span>{% endif %}
       </a>
       <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
-        <button type="submit" title="Sign out {{ user.username }}">{% icon 'logout' %}<span class="label-optional">Sign out</span></button>
+        <button type="submit" title="Sign out {{ user.username }}">{% icon 'logout' %}<span class="nav-label label-optional">Sign out</span></button>
       </form>
     </nav>
   </div>

@@ -1,6 +1,25 @@
 (function () {
   'use strict';
 
+  // Top nav: drop to icon-only buttons only when the labels don't fit
+  var topbar = document.querySelector('.topbar');
+  var nav = topbar && topbar.querySelector('.nav');
+  if (nav) {
+    var LEVELS = ['compact-1', 'compact-2', 'compact-3'];
+    var fitNav = function () {
+      topbar.classList.remove.apply(topbar.classList, LEVELS);
+      for (var i = 0; i < LEVELS.length && nav.scrollWidth > nav.clientWidth + 1; i++) {
+        topbar.classList.add(LEVELS[i]);
+      }
+    };
+    fitNav();
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(fitNav).observe(topbar);
+    } else {
+      window.addEventListener('resize', fitNav);
+    }
+  }
+
   // Ask before submitting forms marked data-confirm (or buttons marked data-confirm)
   document.addEventListener('submit', function (event) {
     var form = event.target;
