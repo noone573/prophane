@@ -8,10 +8,13 @@
 {% include "partials/topbar.html" %}
 {% if messages %}<div class="toast-area" data-autohide>{% include "partials/messages.html" %}</div>{% endif %}
 
-<div class="map-shell">
-  <section class="map-panel" aria-label="Stores">
+<div class="map-shell" id="map-shell">
+  <section class="map-panel" id="map-panel" aria-label="Stores">
     <div class="map-panel-head">
-      <h1>Stores near you</h1>
+      <div class="map-panel-title">
+        <h1>Stores near you</h1>
+        <button type="button" class="btn btn-ghost btn-icon" id="panel-close" aria-controls="map-panel" aria-expanded="true" title="Hide store list">{% icon 'sidebar' %}<span class="sr-only">Hide store list</span></button>
+      </div>
       <p class="muted small">{{ store_count }} store{{ store_count|pluralize }} on the map. Tap one to reserve a tank.</p>
       <div class="input-icon">
         {% icon 'search' %}
@@ -25,6 +28,7 @@
       <p class="small">Try a different name or tank type.</p>
     </div>
   </section>
+  <button type="button" class="btn btn-secondary panel-open" id="panel-open" aria-controls="map-panel" aria-expanded="false">{% icon 'list' %} Stores ({{ store_count }})</button>
   <div id="map" role="application" aria-label="Map of stores"
        data-default-photo="{% static 'img/default.png' %}"></div>
 </div>

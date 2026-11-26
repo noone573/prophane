@@ -246,6 +246,34 @@
     }
   });
 
+  // Collapsible store list; the choice is remembered on this device
+  var shell = document.getElementById('map-shell');
+  var closeBtn = document.getElementById('panel-close');
+  var openBtn = document.getElementById('panel-open');
+  var PANEL_KEY = 'pp-store-panel';
+
+  function setPanel(open, remember) {
+    shell.classList.toggle('is-collapsed', !open);
+    closeBtn.setAttribute('aria-expanded', String(open));
+    openBtn.setAttribute('aria-expanded', String(open));
+    map.invalidateSize();
+    if (remember) {
+      try { localStorage.setItem(PANEL_KEY, open ? 'open' : 'closed'); } catch (e) {}
+    }
+    (open ? closeBtn : openBtn).focus({ preventScroll: true });
+  }
+
+  closeBtn.addEventListener('click', function () { setPanel(false, true); });
+  openBtn.addEventListener('click', function () { setPanel(true, true); });
+
+  try {
+    if (localStorage.getItem(PANEL_KEY) === 'closed') {
+      shell.classList.add('is-collapsed');
+      closeBtn.setAttribute('aria-expanded', 'false');
+      openBtn.setAttribute('aria-expanded', 'false');
+    }
+  } catch (e) {}
+
   renderList('');
   // The panel changes the map's size after first layout on small screens
   setTimeout(function () { map.invalidateSize(); }, 100);

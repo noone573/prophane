@@ -394,6 +394,15 @@ legend { padding: 0; font-weight: 650; font-size: 1.02rem; margin-bottom: 4px; }
 .store-list .from strong { display: block; color: var(--ink); font-size: .95rem; }
 #map { flex: 1; min-height: 0; z-index: 1; background: #e8e6e1; }
 
+.map-panel-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.map-panel-title .btn-icon { margin: -6px -8px 0 0; }
+.panel-open {
+  position: absolute; top: 12px; left: 56px; z-index: 3;
+  box-shadow: var(--shadow-lg);
+}
+.map-shell.is-collapsed .map-panel { display: none; }
+.map-shell:not(.is-collapsed) .panel-open { display: none; }
+
 .map-pin {
   width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
   background: var(--flame); border: 3px solid #fff; box-shadow: 0 3px 10px rgba(0, 0, 0, .3);
